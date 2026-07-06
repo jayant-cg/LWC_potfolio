@@ -1,0 +1,260 @@
+<template>
+    <lightning-card title="My Portfolio" icon-name="standard:account">
+        <!-- ── Profile display ── -->
+        <template if:true={hasAccount}>
+            <div class="slds-p-around_medium">
+                <div class="slds-grid slds-gutters slds-wrap">
+                    <!-- Photo -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-text-align_center">
+                        <template if:true={account.Photo_URL__c}>
+                            <img src={account.Photo_URL__c} alt={account.Name} class="portfolio-photo" />
+                        </template>
+                        <template if:false={account.Photo_URL__c}>
+                            <div class="portfolio-photo-placeholder">
+                                <lightning-icon icon-name="utility:user" size="large"></lightning-icon>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Details -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_9-of-12">
+                        <h1 class="slds-text-heading_large">{account.Name}</h1>
+                        <template if:true={account.Professional_Title__c}>
+                            <p class="portfolio-title">{account.Professional_Title__c}</p>
+                        </template>
+                        <template if:true={account.Description}>
+                            <p class="slds-p-vertical_small">{account.Description}</p>
+                        </template>
+
+                        <!-- Skills badges -->
+                        <template if:true={skills.length}>
+                            <div class="slds-p-vertical_small">
+                                <template for:each={skills} for:item="skill">
+                                    <span key={skill.key} class="slds-badge portfolio-badge">{skill.label}</span>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Contact links -->
+                        <div class="slds-p-vertical_small">
+                            <template if:true={account.Email__c}>
+                                <p class="contact-row">
+                                    <lightning-icon icon-name="utility:email" size="x-small"></lightning-icon>
+                                    <a href={emailLink}>{account.Email__c}</a>
+                                </p>
+                            </template>
+                            <template if:true={account.Phone}>
+                                <p class="contact-row">
+                                    <lightning-icon icon-name="utility:call" size="x-small"></lightning-icon>
+                                    {account.Phone}
+                                </p>
+                            </template>
+                            <template if:true={account.Website}>
+                                <p class="contact-row">
+                                    <lightning-icon icon-name="utility:world" size="x-small"></lightning-icon>
+                                    <a href={account.Website} target="_blank">{account.Website}</a>
+                                </p>
+                            </template>
+                            <template if:true={account.LinkedIn_URL__c}>
+                                <p class="contact-row">
+                                    <lightning-icon icon-name="utility:connected_apps" size="x-small"></lightning-icon>
+                                    <a href={account.LinkedIn_URL__c} target="_blank">LinkedIn</a>
+                                </p>
+                            </template>
+                            <template if:true={account.GitHub_URL__c}>
+                                <p class="contact-row">
+                                    <lightning-icon icon-name="utility:code" size="x-small"></lightning-icon>
+                                    <a href={account.GitHub_URL__c} target="_blank">GitHub</a>
+                                </p>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Error -->
+        <template if:true={error}>
+            <div class="slds-p-around_medium slds-text-color_error">{error}</div>
+        </template>
+
+        <!-- Empty state -->
+        <template if:true={showEmptyState}>
+            <div class="slds-p-around_medium slds-text-align_center">
+                <lightning-icon icon-name="utility:user" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                <p class="slds-text-body_regular slds-m-bottom_medium">No portfolio found yet. Click below to add your details!</p>
+            </div>
+        </template>
+
+        <!-- Footer: Add / Edit button -->
+        <div slot="footer" class="slds-text-align_right">
+            <lightning-button
+                label={editButtonLabel}
+                variant="brand"
+                icon-name="utility:edit"
+                onclick={handleEdit}>
+            </lightning-button>
+        </div>
+    </lightning-card>
+
+    <!-- ── Edit / Add Details Modal ── -->
+    <template if:true={isEditing}>
+        <section
+            role="dialog"
+            tabindex="-1"
+            aria-modal="true"
+            aria-label="Edit Portfolio Details"
+            class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container">
+                <!-- Modal header -->
+                <header class="slds-modal__header">
+                    <button
+                        class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
+                        title="Close"
+                        onclick={handleCancel}>
+                        <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+                        <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <h2 class="slds-modal__title slds-has-divider_bottom-space">{editModalTitle}</h2>
+                </header>
+
+                <!-- Modal body -->
+                <div class="slds-modal__content slds-p-around_medium" id="modal-content">
+
+                    <!-- Basic Info -->
+                    <p class="slds-text-title_caps slds-m-bottom_x-small form-section-title">Basic Info</p>
+                    <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                label="Full Name"
+                                required
+                                value={formData.name}
+                                data-field="name"
+                                onchange={handleFieldChange}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                label="Professional Title"
+                                placeholder="e.g. Salesforce Developer"
+                                value={formData.professionalTitle}
+                                data-field="professionalTitle"
+                                onchange={handleFieldChange}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-m-top_small">
+                            <lightning-input
+                                label="Profile Photo URL"
+                                placeholder="https://example.com/photo.jpg"
+                                value={formData.photoUrl}
+                                data-field="photoUrl"
+                                onchange={handleFieldChange}>
+                            </lightning-input>
+                        </div>
+                    </div>
+
+                    <!-- About -->
+                    <p class="slds-text-title_caps slds-m-bottom_x-small form-section-title">About</p>
+                    <div class="slds-m-bottom_small">
+                        <lightning-textarea
+                            label="Bio / Description"
+                            placeholder="Tell us about yourself..."
+                            value={formData.description}
+                            data-field="description"
+                            onchange={handleFieldChange}>
+                        </lightning-textarea>
+                    </div>
+                    <div class="slds-m-bottom_small">
+                        <lightning-input
+                            label="Skills"
+                            placeholder="e.g. Apex, LWC, SOQL, JavaScript"
+                            field-level-help="Enter skills separated by commas"
+                            value={formData.skills}
+                            data-field="skills"
+                            onchange={handleFieldChange}>
+                        </lightning-input>
+                    </div>
+
+                    <!-- Contact -->
+                    <p class="slds-text-title_caps slds-m-bottom_x-small form-section-title">Contact</p>
+                    <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_small">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                label="Email"
+                                type="email"
+                                value={formData.email}
+                                data-field="email"
+                                onchange={handleFieldChange}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                label="Phone"
+                                type="tel"
+                                value={formData.phone}
+                                data-field="phone"
+                                onchange={handleFieldChange}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-m-top_small">
+                            <lightning-input
+                                label="Website"
+                                type="url"
+                                placeholder="https://yourwebsite.com"
+                                value={formData.website}
+                                data-field="website"
+                                onchange={handleFieldChange}>
+                            </lightning-input>
+                        </div>
+                    </div>
+
+                    <!-- Social -->
+                    <p class="slds-text-title_caps slds-m-bottom_x-small form-section-title">Social Links</p>
+                    <div class="slds-grid slds-gutters slds-wrap">
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                label="LinkedIn URL"
+                                type="url"
+                                placeholder="https://linkedin.com/in/yourprofile"
+                                value={formData.linkedInUrl}
+                                data-field="linkedInUrl"
+                                onchange={handleFieldChange}>
+                            </lightning-input>
+                        </div>
+                        <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                            <lightning-input
+                                label="GitHub URL"
+                                type="url"
+                                placeholder="https://github.com/yourusername"
+                                value={formData.gitHubUrl}
+                                data-field="gitHubUrl"
+                                onchange={handleFieldChange}>
+                            </lightning-input>
+                        </div>
+                    </div>
+
+                    <!-- Save error -->
+                    <template if:true={saveError}>
+                        <div class="slds-m-top_medium slds-text-color_error">
+                            <lightning-icon icon-name="utility:error" size="x-small"></lightning-icon>
+                            {saveError}
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Modal footer -->
+                <footer class="slds-modal__footer">
+                    <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+                    <lightning-button
+                        label={saveButtonLabel}
+                        variant="brand"
+                        disabled={isSaving}
+                        onclick={handleSave}
+                        class="slds-m-left_x-small">
+                    </lightning-button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

@@ -1,0 +1,60 @@
+.portfolio-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #dddbda;
+}
+
+.portfolio-photo-placeholder {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: #f3f2f2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border: 3px solid #dddbda;
+}
+
+.portfolio-title {
+    color: #706e6b;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05rem;
+}
+
+.portfolio-badge {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    background-color: #0176d3;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.contact-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.3rem;
+}
+
+.contact-row a {
+    color: #0176d3;
+    text-decoration: none;
+}
+
+.contact-row a:hover {
+    text-decoration: underline;
+}
+
+.form-section-title {
+    color: #0176d3;
+    font-weight: 700;
+    letter-spacing: 0.04rem;
+    border-bottom: 1px solid #dddbda;
+    padding-bottom: 0.25rem;
+    margin-bottom: 0.5rem;
+}
