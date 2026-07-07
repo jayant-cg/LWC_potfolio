@@ -4,7 +4,7 @@ A Salesforce DX project that displays a personal portfolio (profile, skills, and
 
 ## Screenshot
 
-<img width="1365" height="577" alt="image" src="https://github.com/user-attachments/assets/33902bc3-2c1e-476e-bc07-bdad542a3016" />
+<img width="1361" height="637" alt="portfolio" src="https://github.com/user-attachments/assets/7374bd2d-34f3-4fea-8647-4f3f3b8c99c7" />
 
 ## Overview
 
